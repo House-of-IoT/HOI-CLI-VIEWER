@@ -1,4 +1,6 @@
 use console_logger::ConsoleLogger;
+use facing_data::Facing;
+use facing_data::Config;
 
 pub struct Client{
     host:String,
@@ -99,6 +101,7 @@ impl Client{
     //keep listening for server requests and route the requests
     fn enter_main_loop(&mut self,socket:&mut WebSocket<AutoStream>){
         loop {
+
             if msg != ""{
 
             }
@@ -129,5 +132,20 @@ impl Client{
         else{
             return false;
         }
+    }
+
+    fn execute_two_way_request(&mut self, socket:&mut WebSocket<AutoStream>,message:String){
+        self.send_message(socket,message);
+        let data =  self.gather_message(socket);
+        if data != ""{
+            //parse json and continue accordingly if auth is needed
+        }
+        else{
+            //log issue gathering 
+        }
+    }   
+
+    fn gather_deactivated_bots(&mut self, socket:&mut WebSocket<AutoStream>){
+        // use execute two way request
     }
 }

@@ -1,5 +1,5 @@
 use ansi_term::Colour;
-
+use facing_data::Facing;
 pub struct ConsoleLogger{
     row_number:i16
 }
@@ -41,5 +41,8 @@ impl ConsoleLogger{
         print!("\x1B[2J\x1B[1;1H"); // clears terminal
         println!("{} {} {}\n",Colour::Red.paint("[~] House of Iot"),Colour::Green.paint("CLI interface"), Colour::Red.paint("Version 1.0.0"));
         println!("\n Have any issues with this tool? Please report them to https://github.com/House-of-IoT/HOI-CLI/issues");
+    }
+    pub fn log_interval_data(&mut self, data:Facing){
+
     }
 }
