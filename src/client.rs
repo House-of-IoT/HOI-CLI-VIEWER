@@ -70,4 +70,50 @@ impl Client{
         }
         return false;
     }
+
+    pub fn begin_monitoring(&mut self){
+        self.logger.log_welcome();
+        let url = format!("ws://{}:{}",self.host,self.port);
+        let attempt = connect(Url::parse(&url).unwrap());
+
+        if attempt.is_ok(){
+            let (mut socket, response) = attempt.unwrap();
+            //if we successfully authenticated
+            if self.authenticate(&mut socket) == true{
+                self.enter_main_loop(&mut socket);
+            }
+            else{
+                self.logger.log_failed_auth();
+                self.logger.log_error_encounter();
+            }
+        }
+        else{
+            self.logger.log_error_encounter();
+        }
+    }
+
+    //keep listening for server requests and route the requests
+    fn enter_main_loop(&mut self,socket:&mut WebSocket<AutoStream>){
+        loop {
+            let msg_result = socket.read_message();
+            if msg_result.is_ok(){
+                let msg = msg_result.unwrap().into_text().unwrap();
+                self.route_message(msg,socket,motion_last_sensed,number_of_times_sensed);
+                
+            }
+            else{
+                self.logger.log_error_encounter();
+                *encountered_error = true;
+                break;
+            }
+        }
+    }
+
+    fn gather_message(&mut self)->String{
+        let msg_result = socket.read_message();
+        if msg_result.is_ok(){
+            let msg = msg_result.unwrap().into_text().unwrap();
+            return msg;
+        }
+    } 
 }
