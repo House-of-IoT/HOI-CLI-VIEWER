@@ -1,3 +1,5 @@
+use console_logger::ConsoleLogger;
+
 pub struct Client{
     host:String,
     port:String,
@@ -6,6 +8,7 @@ pub struct Client{
     super_admin_password:String,
     name:String,
     server_name:String,
+    logger:ConsoleLogger
 }
 
 impl Client{
@@ -28,6 +31,7 @@ impl Client{
             name:device_name,
             device_type:type_of_bot,
             server_name:outside_server_name,
+            logger: ConsoleLogger::new()
         }
     }
 
@@ -95,25 +99,35 @@ impl Client{
     //keep listening for server requests and route the requests
     fn enter_main_loop(&mut self,socket:&mut WebSocket<AutoStream>){
         loop {
-            let msg_result = socket.read_message();
-            if msg_result.is_ok(){
-                let msg = msg_result.unwrap().into_text().unwrap();
-                self.route_message(msg,socket,motion_last_sensed,number_of_times_sensed);
-                
+            if msg != ""{
+
             }
             else{
                 self.logger.log_error_encounter();
-                *encountered_error = true;
                 break;
             }
         }
     }
 
-    fn gather_message(&mut self)->String{
+
+    fn gather_message(&mut self,socket:&mut WebSocket<AutoStream>)->String{
         let msg_result = socket.read_message();
         if msg_result.is_ok(){
             let msg = msg_result.unwrap().into_text().unwrap();
             return msg;
         }
+        else{
+            return "".to_owned();
+        }
     } 
+
+    fn send_message(&mut self, socket:&mut WebSocket<AutoStream>,data:String)-> bool{
+        let result = socket.write_message(Message::Text(data));
+        if result.is_ok(){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
