@@ -42,7 +42,30 @@ impl ConsoleLogger{
         println!("{} {} {}\n",Colour::Red.paint("[~] House of Iot"),Colour::Green.paint("CLI interface"), Colour::Red.paint("Version 1.0.0"));
         println!("\n Have any issues with this tool? Please report them to https://github.com/House-of-IoT/HOI-CLI/issues");
     }
-    pub fn log_interval_data(&mut self, data:Facing){
+    pub fn log_interval_data(&mut self, data:Facing,servers_name:String){
+        println!("{}'s real time data",outside_server_name);
+        self.print_sep_line("\n Config");
+        self.print_row("Activating", data.config.activating.to_string());
+        self.print_row("Deactivating", data.config.deactivating.to_string());
+        self.print_row("Disconnecting" , data.config.disconnecting.to_string());
+        self.print_row("Viewing", data.config.viewing.to_string());
+        self.print_sep_line("\n Devices");
+        self.print_row("Different types of bots" , data.different_bots.to_string());
+        self.print_row("Non-Bots", data.non_bots.to_string());
+        self.print_sep_line("\n Contacts");
+        self.print_row("Number Of Contacts",data.contacts.len().to_string());
+        self.print_sep_line("\n Networking");
+        self.print_row("Banned ips" , data.banned_ips.len().to_string());
+
 
     }
+    pub fn print_row(&mut self,header:&str, data: String){
+        println!("     {} - {}",Colour::Green.paint(header),data);
+    }
+
+    pub fn print_sep_line(&mut self, header:String){
+        println!("{}" , Colour::Blue.paint(header));
+    }
+
+
 }
