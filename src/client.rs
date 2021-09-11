@@ -128,6 +128,7 @@ impl Client{
     fn send_message(&mut self, socket:&mut WebSocket<AutoStream>,data:String)-> bool{
         let result = socket.write_message(Message::Text(data));
         if result.is_ok(){
+            println!("issue sending data via socket");
             return true;
         }
         else{
@@ -153,10 +154,24 @@ impl Client{
             //log issue gathering 
         }
     }   
-    
-    // checks to see if we need admin authentication or not
-    fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>)->String{
 
+    // checks to see if we need admin authentication or not
+    fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>,response:Value)->String{
+        if response["status"] == "needs-admin-auth"{
+            if response["action"] == "editing" {
+                self.send_message(self.super_admin_password);
+            }
+            else{
+                self.send_message(self.admin_password);
+            }
+        }
+        else if response["status"] == "success"{
+
+        }
+        // timeout or failure
+        else{
+            
+        }
     }
 
     fn gather_deactivated_bots(&mut self, socket:&mut WebSocket<AutoStream>){
