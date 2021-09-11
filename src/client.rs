@@ -1,6 +1,7 @@
 use console_logger::ConsoleLogger;
 use facing_data::Facing;
 use facing_data::Config;
+use serde_json;
 
 pub struct Client{
     host:String,
@@ -134,16 +135,29 @@ impl Client{
         }
     }
 
-    fn execute_two_way_request(&mut self, socket:&mut WebSocket<AutoStream>,message:String){
+    fn execute_two_way_request(&mut self, socket:&mut WebSocket<AutoStream>,message:String)->String{
         self.send_message(socket,message);
         let data =  self.gather_message(socket);
         if data != ""{
             //parse json and continue accordingly if auth is needed
+            let mut data = serde_json::from_str(data);
+            if data.is_ok(){
+                data = data.unwrap();
+
+            }
+            else{
+                println!("Issue parsing json");
+            }
         }
         else{
             //log issue gathering 
         }
     }   
+    
+    // checks to see if we need admin authentication or not
+    fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>)->String{
+
+    }
 
     fn gather_deactivated_bots(&mut self, socket:&mut WebSocket<AutoStream>){
         // use execute two way request
