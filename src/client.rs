@@ -138,20 +138,22 @@ impl Client{
 
     fn execute_two_way_request(&mut self, socket:&mut WebSocket<AutoStream>,message:String)->String{
         self.send_message(socket,message);
-        let data =  self.gather_message(socket);
+        let mut data =  self.gather_message(socket);
         if data != ""{
             //parse json and continue accordingly if auth is needed
-            let mut data = serde_json::from_str(data);
+            data = serde_json::from_str(data);
             if data.is_ok(){
                 data = data.unwrap();
-
+                return self.check_and_handle_two_way_request_response(socket,data);
             }
             else{
                 println!("Issue parsing json");
+                return String::new();
             }
         }
         else{
             //log issue gathering 
+            return String::new();
         }
     }   
 
