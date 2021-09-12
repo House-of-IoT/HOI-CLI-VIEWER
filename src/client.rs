@@ -229,13 +229,20 @@ impl Client{
         }
     }
 
-    fn gather_config_from_json(&mut self, data:String)->Config{
+    fn gather_config_from_json(&mut self, data:String)->Option<Config>{
         let json_data = serde_json::from_str(data);
         if json_data.is_ok(){
-            
+            let parsed_data = json_data.unwrap();
+            let config = Config{
+                deactivating:parsed_data["deactivating"],
+                activating:parsed_data["activating"],
+                disconnecting:parsed_data["disconnecting"],
+                viewing:parsed_data["viewing"]
+            }
+            return config;
         }
         else{
-
+            return None;
         }
     }
 }
