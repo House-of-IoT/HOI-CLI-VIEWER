@@ -194,24 +194,31 @@ impl Client{
         let config = self.execute_two_way_request(socket,"server_config");
         let contacts = self.execute_two_way_request(socket,"contact_list");
 
-        if deactivated_bots != ""{
+        let mut deactivated_bots_len:i32 = -1;
+        let mut all_devices_len:i32 = -1;
+        let mut banned_ips_len:i32 = -1;
+        let mut contact_len:i32 = -1;
 
+        if deactivated_bots != ""{
+            deactivated_bots_len = self.extract_json_len(deactivated_bots);
+            
         }
         if all_devices != ""{
-
+            all_devices_len = self.extract_json_len(all_devices);
         }
         if banned_ips != ""{
-
+            banned_ips_len = self.extract_json_len(banned_ips);
         }
         if config != ""{
 
         }
         if contacts != ""{
-
+            contact_len = self.extract_json_len(contacts);
         }
     }
 
-    fn extract_json_array_len(&mut self, data:String)-> i32{
+    //intended to be used with object<map> and arrays
+    fn extract_json_len(&mut self, data:String)-> i32{
         let json_data = serde_json::from_str(data);
         if json_data.is_ok(){
             let len : i32 = json_data.unwrap().len();
@@ -219,6 +226,16 @@ impl Client{
         }
         else{
             return -1;
+        }
+    }
+
+    fn gather_config_from_json(&mut self, data:String)->Config{
+        let json_data = serde_json::from_str(data);
+        if json_data.is_ok(){
+            
+        }
+        else{
+
         }
     }
 }
