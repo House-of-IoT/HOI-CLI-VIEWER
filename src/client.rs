@@ -187,8 +187,38 @@ impl Client{
         }
     }
 
+    fn gather_all_facing_data(&mut self,  socket:&mut WebSocket<AutoStream>){
+        let deactivated_bots = self.execute_two_way_request(socket,"servers_deactivated_bots");
+        let all_devices = self.execute_two_way_request(socket,"servers_devices");
+        let banned_ips = self.execute_two_way_request(socket,"servers_banned_ips");
+        let config = self.execute_two_way_request(socket,"server_config");
+        let contacts = self.execute_two_way_request(socket,"contact_list");
 
-    fn gather_deactivated_bots(&mut self, socket:&mut WebSocket<AutoStream>){
-        // use execute two way request
+        if deactivated_bots != ""{
+
+        }
+        if all_devices != ""{
+
+        }
+        if banned_ips != ""{
+
+        }
+        if config != ""{
+
+        }
+        if contacts != ""{
+
+        }
+    }
+
+    fn extract_json_array_len(&mut self, data:String)-> i32{
+        let json_data = serde_json::from_str(data);
+        if json_data.is_ok(){
+            let len : i32 = json_data.unwrap().len();
+            return len;
+        }
+        else{
+            return -1;
+        }
     }
 }
