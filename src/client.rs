@@ -155,24 +155,36 @@ impl Client{
         }
     }   
 
-    // checks to see if we need admin authentication or not
+    // checks to see if we need admin authentication.
+    //if admin auth is needed, handles admin auth and return the result of the post auth response
     fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>,response:Value)->String{
         if response["status"] == "needs-admin-auth"{
+            let mut send_result = String::new();
             if response["action"] == "editing" {
-                self.send_message(self.super_admin_password);
+                send_result = self.send_message(self.super_admin_password);
             }
             else{
-                self.send_message(self.admin_password);
+                send_result = self.send_message(self.admin_password);
+            }
+
+            //check the send result and handle second response recursively
+            if send_result == true{
+                let second_response = self.gather_message(socket);
+                return self.check_and_handle_two_way_request_response(socket,second_response);
+            }
+            else{
+                return String::new();
             }
         }
         else if response["status"] == "success"{
-
+            return response["target_value"];
         }
         // timeout or failure
         else{
-            
+            return String::new();
         }
     }
+
 
     fn gather_deactivated_bots(&mut self, socket:&mut WebSocket<AutoStream>){
         // use execute two way request
