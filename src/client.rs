@@ -198,10 +198,10 @@ impl Client{
         let mut all_devices_len:i32 = -1;
         let mut banned_ips_len:i32 = -1;
         let mut contact_len:i32 = -1;
+        let mut config_holder;
 
         if deactivated_bots != ""{
             deactivated_bots_len = self.extract_json_len(deactivated_bots);
-            
         }
         if all_devices != ""{
             all_devices_len = self.extract_json_len(all_devices);
@@ -209,11 +209,18 @@ impl Client{
         if banned_ips != ""{
             banned_ips_len = self.extract_json_len(banned_ips);
         }
-        if config != ""{
-
-        }
+ 
         if contacts != ""{
             contact_len = self.extract_json_len(contacts);
+        }
+        if config != ""{
+            let data = self.gather_config_from_json(contacts);
+            if data.is_some(){
+                config_holder = data.unwrap();
+            }
+        }
+        return Facing{
+
         }
     }
 
