@@ -219,8 +219,15 @@ impl Client{
                 config_holder = data.unwrap();
             }
         }
+        //need to implement the logic for the values with -1
         return Facing{
-
+            different_bots: -1,
+            non_bots : -1,
+            all_devices: all_devices_len,
+            config : config_holder,
+            contacts:contact_len,
+            connection_string: format!("{}:{}",self.host_data,self.port_data),
+            banned_ips:banned_ips_len
         }
     }
 
