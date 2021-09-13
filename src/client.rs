@@ -2,6 +2,7 @@ use console_logger::ConsoleLogger;
 use facing_data::Facing;
 use facing_data::Config;
 use serde_json;
+use std::{thread, time};
 
 pub struct Client{
     host:String,
@@ -102,14 +103,11 @@ impl Client{
     //keep listening for server requests and route the requests
     fn enter_main_loop(&mut self,socket:&mut WebSocket<AutoStream>){
         loop {
-
-            if msg != ""{
-
-            }
-            else{
-                self.logger.log_error_encounter();
-                break;
-            }
+            let data :Facing = self.gather_all_facing_data(socket);
+            self.console_logger.log_interval_data(data,self.outside_server_name);
+            //run on a ten second interval
+            let milliseconds_to_sleep = time::Duration::from_millis(10000);
+            thread::sleep(milliseconds_to_sleep);
         }
     }
 
@@ -187,7 +185,7 @@ impl Client{
         }
     }
 
-    fn gather_all_facing_data(&mut self,  socket:&mut WebSocket<AutoStream>){
+    fn gather_all_facing_data(&mut self,  socket:&mut WebSocket<AutoStream>)-> Facing{
         let deactivated_bots = self.execute_two_way_request(socket,"servers_deactivated_bots");
         let all_devices = self.execute_two_way_request(socket,"servers_devices");
         let banned_ips = self.execute_two_way_request(socket,"servers_banned_ips");
