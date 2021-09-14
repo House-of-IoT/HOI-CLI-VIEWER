@@ -1,16 +1,16 @@
 pub struct Facing{
-    different_bots:i32,
-    non_bots:i32,
-    all_devices:i32,
-    config:Config,
-    contacts:Vec<String>,
-    connection_string:String,
-    banned_ips : Vec<String> 
+    pub different_bots:i32,
+    pub non_bots:i32,
+    pub all_devices:i32,
+    pub config:Config,
+    pub contacts:Vec<String>,
+    pub connection_string:String,
+    pub banned_ips : Vec<String> 
 }
 
 pub struct Config{
-    deactivating:bool,
-    activating:bool,
-    disconnecting:bool,
-    viewing:bool
+    pub deactivating:bool,
+    pub activating:bool,
+    pub disconnecting:bool,
+    pub viewing:bool
 }

@@ -2,7 +2,7 @@ use crate::console_logger::ConsoleLogger;
 
 use crate::facing_data::Config;
 use crate::facing_data::Facing;
-use serde_json;
+use serde_json::{Value};
 use std::{thread, time};
 use tungstenite::{connect, Message,WebSocket};
 use tungstenite::client::AutoStream;
@@ -17,7 +17,8 @@ pub struct Client{
     super_admin_password:String,
     name:String,
     server_name:String,
-    logger:ConsoleLogger
+    logger:ConsoleLogger,
+    device_type :String
 }
 
 impl Client{
@@ -37,7 +38,7 @@ impl Client{
             super_admin_password:super_pw,
             admin_password:admin_pw,
             name:device_name,
-            device_type:type_of_bot,
+            device_type:"non-bot".to_owned(),
             server_name:outside_server_name,
             logger: ConsoleLogger::new()
         }
@@ -259,5 +260,13 @@ impl Client{
         else{
             return None;
         }
+    }
+
+    fn name_and_type(&mut self)-> String{
+        let name_and_type = json!({
+            "name":&self.name,
+            "type":&self.device_type
+        });
+        return name_and_type.to_string();
     }
 }

@@ -65,7 +65,7 @@ impl ConsoleLogger{
         println!("     {} - {}",Colour::Green.paint(header),data);
     }
 
-    pub fn print_sep_line(&mut self, header:String){
+    pub fn print_sep_line(&mut self, header:&str){
         println!("{}" , Colour::Blue.paint(header));
     }
 

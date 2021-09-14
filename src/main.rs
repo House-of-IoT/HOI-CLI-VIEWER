@@ -21,7 +21,8 @@ fn gather_field(output_data:&str)-> String{
     let mut data = String::new();
     print!("{}",output_data);
     stdout().flush().unwrap();
-    stdin.read_line(&mut data);
+    stdin().read_line(&mut data);
+    return data;
 }
 
 fn main() {
