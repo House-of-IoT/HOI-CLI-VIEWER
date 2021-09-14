@@ -23,13 +23,12 @@ impl Client{
         device_name:String,
         outside_server_name:String,
         admin_pw : String,
-        super_pw : String,
-        pw : String)->Self{
+        super_pw : String)->Self{
 
         Self{
             host:host_data.to_string(),
             port:port_data,
-            password:pw,
+            password:pass,
             super_admin_password:super_pw,
             admin_password:admin_pw
             name:device_name,
@@ -110,7 +109,6 @@ impl Client{
             thread::sleep(milliseconds_to_sleep);
         }
     }
-
 
     fn gather_message(&mut self,socket:&mut WebSocket<AutoStream>)->String{
         let msg_result = socket.read_message();
