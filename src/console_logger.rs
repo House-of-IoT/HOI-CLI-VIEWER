@@ -1,5 +1,6 @@
 use ansi_term::Colour;
-use facing_data::Facing;
+use crate::facing_data::Facing;
+
 pub struct ConsoleLogger{
     row_number:i16
 }
@@ -44,7 +45,7 @@ impl ConsoleLogger{
     }
     
     pub fn log_interval_data(&mut self, data:Facing,servers_name:String){
-        println!("{}'s real time data",outside_server_name);
+        println!("{}'s real time data",servers_name);
         self.print_sep_line("\n Config");
         self.print_row("Activating", data.config.activating.to_string());
         self.print_row("Deactivating", data.config.deactivating.to_string());

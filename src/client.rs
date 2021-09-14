@@ -1,8 +1,13 @@
-use console_logger::ConsoleLogger;
-use facing_data::Facing;
-use facing_data::Config;
+use crate::console_logger::ConsoleLogger;
+
+use crate::facing_data::Config;
+use crate::facing_data::Facing;
 use serde_json;
 use std::{thread, time};
+use tungstenite::{connect, Message,WebSocket};
+use tungstenite::client::AutoStream;
+use url::Url;
+use std::env;
 
 pub struct Client{
     host:String,
@@ -30,7 +35,7 @@ impl Client{
             port:port_data,
             password:pass,
             super_admin_password:super_pw,
-            admin_password:admin_pw
+            admin_password:admin_pw,
             name:device_name,
             device_type:type_of_bot,
             server_name:outside_server_name,
@@ -248,7 +253,7 @@ impl Client{
                 activating:parsed_data["activating"],
                 disconnecting:parsed_data["disconnecting"],
                 viewing:parsed_data["viewing"]
-            }
+            };
             return config;
         }
         else{
