@@ -109,7 +109,7 @@ impl Client{
     fn enter_main_loop(&mut self,socket:&mut WebSocket<AutoStream>){
         loop {
             let data :Facing = self.gather_all_facing_data(socket);
-            self.console_logger.log_interval_data(data,self.outside_server_name);
+            self.logger.log_interval_data(data,self.server_name);
             //run on a ten second interval
             let milliseconds_to_sleep = time::Duration::from_millis(10000);
             thread::sleep(milliseconds_to_sleep);
@@ -143,10 +143,10 @@ impl Client{
         let mut data =  self.gather_message(socket);
         if data != ""{
             //parse json and continue accordingly if auth is needed
-            data = serde_json::from_str(data);
-            if data.is_ok(){
-                data = data.unwrap();
-                return self.check_and_handle_two_way_request_response(socket,data);
+            let data_result = serde_json::from_str(&data);
+            if data_result.is_ok(){
+                data = data_result.unwrap();
+                return self.check_and_handle_two_way_request_response(socket,serde_json::Value::String(data));
             }
             else{
                 println!("Issue parsing json");
@@ -163,25 +163,25 @@ impl Client{
     //if admin auth is needed, handles admin auth and return the result of the post auth response
     fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>,response:Value)->String{
         if response["status"] == "needs-admin-auth"{
-            let mut send_result = String::new();
+            let mut send_result;
             if response["action"] == "editing" {
-                send_result = self.send_message(self.super_admin_password);
+                send_result = self.send_message(socket,self.super_admin_password);
             }
             else{
-                send_result = self.send_message(self.admin_password);
+                send_result = self.send_message(socket,self.admin_password);
             }
 
             //check the send result and handle second response recursively
             if send_result == true{
                 let second_response = self.gather_message(socket);
-                return self.check_and_handle_two_way_request_response(socket,second_response);
+                return self.check_and_handle_two_way_request_response(socket,serde_json::Value::String(second_response));
             }
             else{
                 return String::new();
             }
         }
         else if response["status"] == "success"{
-            return response["target_value"];
+            return response["target_value"].to_string();
         }
         // timeout or failure
         else{
@@ -190,11 +190,11 @@ impl Client{
     }
 
     fn gather_all_facing_data(&mut self,  socket:&mut WebSocket<AutoStream>)-> Facing{
-        let deactivated_bots = self.execute_two_way_request(socket,"servers_deactivated_bots");
-        let all_devices = self.execute_two_way_request(socket,"servers_devices");
-        let banned_ips = self.execute_two_way_request(socket,"servers_banned_ips");
-        let config = self.execute_two_way_request(socket,"server_config");
-        let contacts = self.execute_two_way_request(socket,"contact_list");
+        let deactivated_bots = self.execute_two_way_request(socket,"servers_deactivated_bots".to_string());
+        let all_devices = self.execute_two_way_request(socket,"servers_devices".to_string());
+        let banned_ips = self.execute_two_way_request(socket,"servers_banned_ips".to_string());
+        let config = self.execute_two_way_request(socket,"server_config".to_string());
+        let contacts = self.execute_two_way_request(socket,"contact_list".to_string());
 
         let mut deactivated_bots_len:i32 = -1;
         let mut all_devices_len:i32 = -1;
@@ -228,14 +228,14 @@ impl Client{
             all_devices: all_devices_len,
             config : config_holder,
             contacts:contact_len,
-            connection_string: format!("{}:{}",self.host_data,self.port_data),
+            connection_string: format!("{}:{}",self.host,self.port),
             banned_ips:banned_ips_len
         }
     }
 
     //intended to be used with object<map> and arrays
     fn extract_json_len(&mut self, data:String)-> i32{
-        let json_data = serde_json::from_str(data);
+        let json_data = serde_json::from_str(&data);
         if json_data.is_ok(){
             let len : i32 = json_data.unwrap().len();
             return len;
@@ -246,16 +246,16 @@ impl Client{
     }
 
     fn gather_config_from_json(&mut self, data:String)->Option<Config>{
-        let json_data = serde_json::from_str(data);
+        let json_data = serde_json::from_str(&data);
         if json_data.is_ok(){
             let parsed_data = json_data.unwrap();
             let config = Config{
-                deactivating:parsed_data["deactivating"],
-                activating:parsed_data["activating"],
-                disconnecting:parsed_data["disconnecting"],
-                viewing:parsed_data["viewing"]
+                deactivating:parsed_data["deactivating"].to_string(),
+                activating:parsed_data["activating"].to_string(),
+                disconnecting:parsed_data["disconnecting"].to_string(),
+                viewing:parsed_data["viewing"].to_string()
             };
-            return config;
+            return Some(config);
         }
         else{
             return None;

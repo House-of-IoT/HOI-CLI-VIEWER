@@ -9,8 +9,8 @@ pub struct Facing{
 }
 
 pub struct Config{
-    pub deactivating:bool,
-    pub activating:bool,
-    pub disconnecting:bool,
-    pub viewing:bool
+    pub deactivating:String,
+    pub activating:String,
+    pub disconnecting:String,
+    pub viewing:String
 }
