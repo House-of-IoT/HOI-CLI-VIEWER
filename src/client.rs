@@ -8,6 +8,8 @@ use tungstenite::{connect, Message,WebSocket};
 use tungstenite::client::AutoStream;
 use url::Url;
 use std::env;
+use serde_json::Map;
+use std::convert::TryInto;
 
 pub struct Client{
     host:String,
@@ -109,7 +111,7 @@ impl Client{
     fn enter_main_loop(&mut self,socket:&mut WebSocket<AutoStream>){
         loop {
             let data :Facing = self.gather_all_facing_data(socket);
-            self.logger.log_interval_data(data,self.server_name);
+            self.logger.log_interval_data(data,self.server_name.clone());
             //run on a ten second interval
             let milliseconds_to_sleep = time::Duration::from_millis(10000);
             thread::sleep(milliseconds_to_sleep);
@@ -165,10 +167,10 @@ impl Client{
         if response["status"] == "needs-admin-auth"{
             let mut send_result;
             if response["action"] == "editing" {
-                send_result = self.send_message(socket,self.super_admin_password);
+                send_result = self.send_message(socket,self.super_admin_password.clone());
             }
             else{
-                send_result = self.send_message(socket,self.admin_password);
+                send_result = self.send_message(socket,self.admin_password.clone());
             }
 
             //check the send result and handle second response recursively
@@ -201,26 +203,39 @@ impl Client{
         let mut banned_ips_len:i32 = -1;
         let mut contact_len:i32 = -1;
         let mut config_holder;
+        let empty_config = Config{
+            deactivating:String::new(),
+            activating:String::new(),
+            viewing:String::new(),
+            disconnecting:String::new()
+        };
 
         if deactivated_bots != ""{
-            deactivated_bots_len = self.extract_json_len(deactivated_bots);
+            deactivated_bots_len = self.extract_json_len(&deactivated_bots);
         }
         if all_devices != ""{
-            all_devices_len = self.extract_json_len(all_devices);
+            all_devices_len = self.extract_json_len( &all_devices);
         }
         if banned_ips != ""{
-            banned_ips_len = self.extract_json_len(banned_ips);
+            banned_ips_len = self.extract_json_len_vec(banned_ips);
         }
  
         if contacts != ""{
-            contact_len = self.extract_json_len(contacts);
+            contact_len = self.extract_json_len(&contacts);
         }
         if config != ""{
             let data = self.gather_config_from_json(contacts);
             if data.is_some(){
                 config_holder = data.unwrap();
             }
+            else{
+                config_holder = empty_config;
+            }
         }
+        else{
+            config_holder = empty_config;
+        }
+    
         //need to implement the logic for the values with -1
         return Facing{
             different_bots: -1,
@@ -234,10 +249,22 @@ impl Client{
     }
 
     //intended to be used with object<map> and arrays
-    fn extract_json_len(&mut self, data:String)-> i32{
-        let json_data = serde_json::from_str(&data);
+    fn extract_json_len(&mut self, data:&String)-> i32{
+        let json_data : std::result::Result<Vec<String>, serde_json::Error> = serde_json::from_str(&data);
         if json_data.is_ok(){
-            let len : i32 = json_data.unwrap().len();
+            let len : i32 = json_data.unwrap().len().try_into().unwrap();
+            return len;
+        }
+        else{
+            return -1;
+        }
+    }
+
+    fn extract_json_len_vec(&mut self, data:String)-> i32{
+        let json_data: std::result::Result<Vec<String>, serde_json::Error>  = serde_json::from_str(&data);
+        if json_data.is_ok(){
+            let json_test  = json_data.unwrap();
+            let len : i32= json_test.len().try_into().unwrap();
             return len;
         }
         else{
@@ -248,14 +275,8 @@ impl Client{
     fn gather_config_from_json(&mut self, data:String)->Option<Config>{
         let json_data = serde_json::from_str(&data);
         if json_data.is_ok(){
-            let parsed_data = json_data.unwrap();
-            let config = Config{
-                deactivating:parsed_data["deactivating"].to_string(),
-                activating:parsed_data["activating"].to_string(),
-                disconnecting:parsed_data["disconnecting"].to_string(),
-                viewing:parsed_data["viewing"].to_string()
-            };
-            return Some(config);
+            let parsed_data: Config = json_data.unwrap();
+            return Some(parsed_data);
         }
         else{
             return None;

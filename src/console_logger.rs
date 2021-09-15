@@ -55,9 +55,9 @@ impl ConsoleLogger{
         self.print_row("Different types of bots" , data.different_bots.to_string());
         self.print_row("Non-Bots", data.non_bots.to_string());
         self.print_sep_line("\n Contacts");
-        self.print_row("Number Of Contacts",data.contacts.len().to_string());
+        self.print_row("Number Of Contacts",data.contacts.to_string());
         self.print_sep_line("\n Networking");
-        self.print_row("Banned ips" , data.banned_ips.len().to_string());
+        self.print_row("Banned ips" , data.banned_ips.to_string());
         self.print_row("Connection String" , data.connection_string);
     }
 
