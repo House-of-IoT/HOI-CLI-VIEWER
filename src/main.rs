@@ -24,7 +24,7 @@ fn gather_field(output_data:&str)-> String{
     print!("{}",output_data);
     stdout().flush().unwrap();
     stdin().read_line(&mut data);
-    return data;
+    return data.trim().to_string();
 }
 
 fn main() {

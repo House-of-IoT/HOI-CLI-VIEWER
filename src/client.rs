@@ -51,6 +51,7 @@ impl Client{
 
         if msg_result.is_ok(){
             let msg = msg_result.unwrap().into_text().unwrap();
+            println!("response: {}",msg);
             if msg == "success"{
                 self.logger.log_basic_row("Successfully Authenticated!!\n","green");
                 return true;
@@ -98,6 +99,7 @@ impl Client{
                 self.enter_main_loop(&mut socket);
             }
             else{
+                
                 self.logger.log_failed_auth();
                 self.logger.log_error_encounter();
             }
