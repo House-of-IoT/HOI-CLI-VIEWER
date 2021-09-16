@@ -248,9 +248,9 @@ impl Client{
         }
     }
 
-    //intended to be used with object<map> and arrays
+    //intended to be used with map
     fn extract_json_len(&mut self, data:&String)-> i32{
-        let json_data : std::result::Result<Vec<String>, serde_json::Error> = serde_json::from_str(&data);
+        let json_data : std::result::Result<serde_json::Map<String, Value>, serde_json::Error> = serde_json::from_str(&data);
         if json_data.is_ok(){
             let len : i32 = json_data.unwrap().len().try_into().unwrap();
             return len;
