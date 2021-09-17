@@ -168,13 +168,18 @@ impl Client{
 
     // checks to see if we need admin authentication.
     //if admin auth is needed, handles admin auth and return the result of the post auth response
-    fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>,response:BasicResponse)->String{
-        if response.status == "needs-admin-auth"{
+    fn check_and_handle_two_way_request_response(
+        &mut self, 
+        socket:&mut WebSocket<AutoStream>,
+        response:Option<BasicResponse>,
+        response_vec:Option<BasicResponseVec>)->String{
+        let mut re
+        if response_holder.status == "needs-admin-auth"{
             let send_result = self.send_password_for_authentication(socket,response);
 
             //check the send result and handle second response recursively
             if send_result == true{
-                return self.gather_response_and_parse_data(socket,response);
+                return self.gather_response_and_parse_data(socket);
             }
             else{
                 return String::new();
@@ -294,23 +299,49 @@ impl Client{
         return name_and_type.to_string();
     }
     
-    fn send_password_for_authentication(&mut self, socket:&mut WebSocket<AutoStream>,response:BasicResponse)->bool{
-        if response.action == "editing" {
-           return self.send_message(socket,self.super_admin_password.clone());
+    fn send_password_for_authentication(
+        &mut self, 
+        socket:&mut WebSocket<AutoStream>,
+        response:Option<BasicResponse>,
+        response_vec:Option<BasicResponseVec>)->bool{
+        if response.is_some(){
+            let response_value = response.unwrap();
+            if response_value.action == "editing" {
+                return self.send_message(socket,self.super_admin_password.clone());
+            }
+            else{
+                return self.send_message(socket,self.admin_password.clone());
+            }
         }
         else{
-            return self.send_message(socket,self.admin_password.clone());
+            let response_vec_value = response_vec.unwrap();
+            if response_vec_value.action == "editing" {
+                return self.send_message(socket,self.super_admin_password.clone());
+            }
+            else{
+                return self.send_message(socket,self.admin_password.clone());
+            }
         }
     }
-    fn gather_response_and_parse_data(&mut self,socket:&mut WebSocket<AutoStream>,response:BasicResponse){
+
+    fn gather_response_and_parse_data(
+        &mut self,
+        socket:&mut WebSocket<AutoStream>,
+        type_of_data:&str){
         let second_response = self.gather_message(socket);
         if second_response != ""{
-            println!("{}",second_response);
-            let second_parsed : std::result::Result::<BasicResponse, serde_json::Error> = serde_json::from_str(&second_response);
-            return self.check_and_handle_two_way_request_response(socket,second_parsed.unwrap());
+            if type_of_data == "map"{
+                let second_parsed : std::result::Result::<BasicResponse, serde_json::Error> = serde_json::from_str(&second_response);
+                return self.check_and_handle_two_way_request_response(socket,second_parsed.unwrap());
+            }
+            else{
+                let second_parsed : std::result::Result::<BasicResponseVec, serde_json::Error> = serde_json::from_str(&second_response);
+                return self.check_and_handle_two_way_request_response(socket,second_parsed.unwrap());
+            }       
         }
         else{
             return String::new();
         }
     }
+    
 }
