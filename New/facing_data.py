@@ -1,9 +1,11 @@
 class Facing:
-    def __init__(self,all_devices = None,config = None , contacts = None , banned_ips = None):
+    def __init__(self,all_devices = None,config = None , contacts = None , banned_ips = None, deactivated_bots = None):
         self.all_devices = all_devices
         self.config = config  
         self.contacts = contacts
         self.banned_ips = banned_ips
+        self.deactivated_bots = deactivated_bots
+        self.num_of_deactivated_bots = 0
         self.num_of_non_bots = 0
         self.num_of_bots = 0
         self.num_of_contacts = 0
@@ -12,6 +14,7 @@ class Facing:
     def analyze_data_and_populate_instance(self):
         self.num_of_banned_ips = len(self.banned_ips)
         self.num_of_contacts = len(self.contacts)
+        self.deactivated_bots = len(self.num_of_deactivated_bots)
         self.gather_device_stats()
 
     def gather_device_stats(self):
