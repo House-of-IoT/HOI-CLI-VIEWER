@@ -11,6 +11,7 @@ extern crate  serde;
 #[macro_use]
 extern crate serde_json;
 
+mod types;
 mod console_logger;
 mod facing_data;
 mod client;

@@ -1,5 +1,5 @@
 use crate::console_logger::ConsoleLogger;
-
+use crate::types::BasicResponse;
 use crate::facing_data::Config;
 use crate::facing_data::Facing;
 use serde_json::{Value};
@@ -134,23 +134,26 @@ impl Client{
     fn send_message(&mut self, socket:&mut WebSocket<AutoStream>,data:String)-> bool{
         let result = socket.write_message(Message::Text(data));
         if result.is_ok(){
-            println!("issue sending data via socket");
+         
             return true;
         }
         else{
+            result.unwrap();
+            println!("issue sending data via socket");
             return false;
         }
     }
 
-    fn execute_two_way_request(&mut self, socket:&mut WebSocket<AutoStream>,message:String)->String{
+    fn execute_two_way_request(&mut self, socket:&mut WebSocket<AutoStream>,message:String,data_type:String)->String{
         self.send_message(socket,message);
-        let mut data =  self.gather_message(socket);
+        let mut data :String =  self.gather_message(socket);
         if data != ""{
             //parse json and continue accordingly if auth is needed
-            let data_result = serde_json::from_str(&data);
+            let data_result:std::result::Result::<BasicResponse, serde_json::Error> = serde_json::from_str(&data);
+            println!("{}",data);
             if data_result.is_ok(){
-                data = data_result.unwrap();
-                return self.check_and_handle_two_way_request_response(socket,serde_json::Value::String(data));
+                let parsed_data = data_result.unwrap();
+                return self.check_and_handle_two_way_request_response(socket,parsed_data);
             }
             else{
                 println!("Issue parsing json");
@@ -165,27 +168,25 @@ impl Client{
 
     // checks to see if we need admin authentication.
     //if admin auth is needed, handles admin auth and return the result of the post auth response
-    fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>,response:Value)->String{
-        if response["status"] == "needs-admin-auth"{
-            let mut send_result;
-            if response["action"] == "editing" {
-                send_result = self.send_message(socket,self.super_admin_password.clone());
-            }
-            else{
-                send_result = self.send_message(socket,self.admin_password.clone());
-            }
+    fn check_and_handle_two_way_request_response(&mut self, socket:&mut WebSocket<AutoStream>,response:BasicResponse)->String{
+        if response.status == "needs-admin-auth"{
+            let send_result = self.send_password_for_authentication(socket,response);
 
             //check the send result and handle second response recursively
             if send_result == true{
-                let second_response = self.gather_message(socket);
-                return self.check_and_handle_two_way_request_response(socket,serde_json::Value::String(second_response));
+                return self.gather_response_and_parse_data(socket,response);
             }
             else{
                 return String::new();
             }
         }
-        else if response["status"] == "success"{
-            return response["target_value"].to_string();
+        else if response.status == "success"{
+            if response.target_value.is_some(){
+                return response.target_value.unwrap();
+            }
+            else{
+                return String::new();
+            }
         }
         // timeout or failure
         else{
@@ -291,5 +292,25 @@ impl Client{
             "type":&self.device_type
         });
         return name_and_type.to_string();
+    }
+    
+    fn send_password_for_authentication(&mut self, socket:&mut WebSocket<AutoStream>,response:BasicResponse)->bool{
+        if response.action == "editing" {
+           return self.send_message(socket,self.super_admin_password.clone());
+        }
+        else{
+            return self.send_message(socket,self.admin_password.clone());
+        }
+    }
+    fn gather_response_and_parse_data(&mut self,socket:&mut WebSocket<AutoStream>,response:BasicResponse){
+        let second_response = self.gather_message(socket);
+        if second_response != ""{
+            println!("{}",second_response);
+            let second_parsed : std::result::Result::<BasicResponse, serde_json::Error> = serde_json::from_str(&second_response);
+            return self.check_and_handle_two_way_request_response(socket,second_parsed.unwrap());
+        }
+        else{
+            return String::new();
+        }
     }
 }
