@@ -1,6 +1,8 @@
 from console_logging import ConsoleLogger
+from request_handler import RequestHandler
 import websockets
 import asyncio
+import json
 
 class Main:
     def __init__(self):
@@ -8,6 +10,8 @@ class Main:
         self.password = None
         self.admin_password = None
         self.super_admin_password = None
+        self.host = None
+        self.port = None
         
     async def main(self ,restart = False):
         self.logger.start_message("Door Monitor")
@@ -34,8 +38,13 @@ class Main:
             except:
                 ConsoleLogger.log_issue_establishing_connection(times_attempted)
                 times_attempted += 1
+    
 
-    async def begin_logging_information(self):
+    
+    async def begin_logging_information(self,websocket):
+
+
+        
 
                 
                 
