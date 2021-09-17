@@ -1,4 +1,4 @@
-from facing_data import Config
+from facing_data import Config, Facing
 from console_logging import ConsoleLogger
 from request_handler import RequestHandler
 import websockets
@@ -14,7 +14,7 @@ class Main:
         self.host = None
         self.port = None
         self.request_handler = None
-        
+        self.name = None
     async def main(self ,restart = False):
         self.logger.start_message("HOI Analyzation Tool")
         if restart != True:
@@ -23,6 +23,7 @@ class Main:
             self.super_admin_password = input("\nSuper Admin Password for the server")
             self.host = input("\nHost:")
             self.port = input("\nPort:")
+            self.name = input("\nName:")
 
         websocket = await self.establish_connection()
         self.request_handler = RequestHandler(websocket,self)
@@ -35,37 +36,44 @@ class Main:
             self.logger.log_failed_auth()
         else:
             self.logger.log_passed_auth()
-            t1 = loop.create_task(self.test_send_periodic_data_and_listen(websocket))
+            t1 = loop.create_task(self.begin_logging_information())
             await asyncio.wait([t1])
 
     
     async def establish_connection(self):
-        times_attempted = 1
-        while True:
+            times_attempted = 1
             try:
-                return await websockets.connect(f'ws://{self.config.host}:{self.config.port}'  ,  ping_interval= None  , max_size = 20000000)
-            except:
+                return await websockets.connect(f'ws://{self.host}:{self.port}'  ,  ping_interval= None  , max_size = 20000000)
+            except Exception as e:
+                print(e)
                 ConsoleLogger.log_issue_establishing_connection(times_attempted)
                 times_attempted += 1
 
     async def gather_all_data_for_interval(self):
-        config = self.request_data_and_parse_config("server_config")
-        contacts = self.request_data_and_parse("contact_list")
-        banned_ips = self.request_data_and_parse("servers_banned_ips")
-        all_devices = self.request_data_and_parse("servers_devices")
-        deactivated_bots = self.request_data_and_parse("servers_deactivated_bots")
+        config = await self.request_data_and_parse_config("server_config")
+        contacts =await self.request_data_and_parse("contact_list", "array")
+        banned_ips = await self.request_data_and_parse("servers_banned_ips","array")
+        all_devices = await self.request_data_and_parse("servers_devices","map")
+        deactivated_bots = await self.request_data_and_parse("servers_deactivated_bots","array")
+        facing = Facing(all_devices,config,contacts,banned_ips,deactivated_bots)
+        facing.analyze_data_and_populate_instance()
+        print(config)
+        print(contacts)
+        print(banned_ips)
 
+    async def begin_logging_information(self):
+        while True:
+            await self.gather_all_data_for_interval()
+            await asyncio.sleep(10)
 
-    async def begin_logging_information(self,websocket):
-        pass
-
-    def request_data_and_parse_config(self,opcode):
-        data = self.request_handler.handle_two_way_request(opcode)
+    async def request_data_and_parse_config(self,opcode):
+        data = await  self.request_handler.handle_two_way_request(opcode)
         data_dict = json.loads(data)
         if data_dict["status"] == "success":
+            print(data_dict["target_value"])
             config_dict = json.loads(data_dict["target_value"])
             config = Config(
-                deactivating = config_dict["deactiving"], 
+                deactivating = config_dict["deactivating"], 
                 activating=config_dict["activating"],
                 disconnecting=config_dict["disconnecting"],
                 viewing=config_dict["viewing"])
@@ -73,21 +81,21 @@ class Main:
         else:
             return None
 
-    def request_data_and_parse(self,opcode):
-        data = self.request_handler.handle_two_way_request(opcode)
+    async def request_data_and_parse(self,opcode,type_of_data):
+        data = await self.request_handler.handle_two_way_request(opcode)
         data_dict = json.loads(data)
         if data_dict["status"] == "success":
-            target_data = json.loads(data_dict["target_value"])
+            if type_of_data == "map":
+                target_data = json.loads(data_dict["target_value"])
+            else:
+                target_data = data_dict["target_value"]
             return target_data
         else:
             return None
 
     def name_and_type(self):
         data = {"name":self.name , "type":"non-bot"}
-        return json.dumps(data)        
-
-                
-                
+        return json.dumps(data)           
  
 if __name__ == "__main__":
     main = Main()

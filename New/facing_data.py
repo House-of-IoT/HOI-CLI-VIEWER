@@ -12,18 +12,22 @@ class Facing:
         self.num_of_banned_ips = 0
 
     def analyze_data_and_populate_instance(self):
-        self.num_of_banned_ips = len(self.banned_ips)
-        self.num_of_contacts = len(self.contacts)
-        self.deactivated_bots = len(self.num_of_deactivated_bots)
+        if self.banned_ips != None:
+            self.num_of_banned_ips = len(self.banned_ips)
+        if self.contacts != None:
+            self.num_of_contacts = len(self.contacts)
+        if self.deactivated_bots != None:
+            self.num_of_deactivated_bots = len(self.deactivated_bots)
         self.gather_device_stats()
 
     def gather_device_stats(self):
-        all_device_keys = self.all_devices.keys()
-        for key in all_device_keys:
-            if self.all_devices[key] == "non-bot":
-                self.num_of_non_bots += 1
-        self.num_of_bots = len(all_device_keys) - self.num_of_non_bots  
-            
+        if self.all_devices != None:
+            all_device_keys = self.all_devices.keys()
+            for key in all_device_keys:
+                if self.all_devices[key] == "non-bot":
+                    self.num_of_non_bots += 1
+            self.num_of_bots = len(all_device_keys) - self.num_of_non_bots  
+                
 class Config:
     def __init__(self,deactivating = None,activating = None,disconnecting = None,viewing = None):
         self.deactivating = deactivating

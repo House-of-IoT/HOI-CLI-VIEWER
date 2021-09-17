@@ -7,7 +7,7 @@ class RequestHandler:
 
     async def handle_two_way_request(self,message):
         await self.websocket.send(message)
-        response = self.websocket.recv()
+        response = await self.websocket.recv()
         basic_response = json.loads(response)
 
         #send authentication credentials if needed
