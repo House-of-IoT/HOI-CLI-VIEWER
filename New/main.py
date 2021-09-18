@@ -61,14 +61,16 @@ class Main:
         banned_ips = await self.request_data_and_parse("servers_banned_ips","array")
         all_devices = await self.request_data_and_parse("servers_devices","map")
         deactivated_bots = await self.request_data_and_parse("servers_deactivated_bots","array")
-        last_updated = datetime.datetime.now()
         facing = Facing(all_devices,config,json.loads(contacts),banned_ips,deactivated_bots)
         facing.analyze_data_and_populate_instance()
-        ConsoleLogger.log_real_time_iteration(facing,self.servers_name,self.interval,last_updated)
+        return facing
+        
 
     async def begin_logging_information(self):
         while True:
-            await self.gather_all_data_for_interval()
+            facing = await self.gather_all_data_for_interval()
+            last_updated = datetime.datetime.now()
+            ConsoleLogger.log_real_time_iteration(facing,self.servers_name,self.interval,last_updated)
             await asyncio.sleep(self.interval)
 
     async def request_data_and_parse_config(self,opcode):
