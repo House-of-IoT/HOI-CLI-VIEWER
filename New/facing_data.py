@@ -1,3 +1,4 @@
+import json 
 class Facing:
     def __init__(self,all_devices = None,config = None , contacts = None , banned_ips = None, deactivated_bots = None):
         self.all_devices = all_devices
@@ -15,7 +16,7 @@ class Facing:
         if self.banned_ips != None:
             self.num_of_banned_ips = len(self.banned_ips)
         if self.contacts != None:
-            self.num_of_contacts = len(self.contacts)
+            self.num_of_contacts = len(self.contacts.keys())
         if self.deactivated_bots != None:
             self.num_of_deactivated_bots = len(self.deactivated_bots)
         self.gather_device_stats()
