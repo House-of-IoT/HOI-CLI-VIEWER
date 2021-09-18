@@ -10,4 +10,4 @@ This client is mainly for straight forward visual analytics with on a custom rea
 
 ## Usage
  
-Navigate to the "New" directory and run "python3 main.py" make sure you satisfy all of the requirements(dockerization will come soon).
+Navigate to the "New" directory and run `python3 main.py` make sure you satisfy all of the requirements(dockerization will come soon).
