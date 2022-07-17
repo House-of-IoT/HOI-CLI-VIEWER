@@ -1,7 +1,6 @@
 from termcolor import colored
 
 class ConsoleLogger:
-
     def __init__(self):
         self.row_number = 0
 

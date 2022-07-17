@@ -5,19 +5,20 @@ import websockets
 import asyncio
 import json
 import datetime
+import colorama
 
 class Main:
     def __init__(self):
+        colorama.init()
         self.logger = ConsoleLogger()
         self.password = None
         self.admin_password = None
         self.super_admin_password = None
-        self.host = None
-        self.port = None
         self.request_handler = None
         self.name = None
         self.servers_name = ""
         self.interval = None
+        self.connection_string = None
 
     async def main(self ,restart = False):
         self.logger.start_message("HOI Analyzation Tool")
@@ -25,8 +26,7 @@ class Main:
             self.password = input("\nPassword for the server:")
             self.admin_password = input("\nAdmin Password for the server:")
             self.super_admin_password = input("\nSuper Admin Password for the server:")
-            self.host = input("\nHost:")
-            self.port = input("\nPort:")
+            self.connection_string = input("\nConnection String(wss://example.com or ws://):")
             self.name = input("\nName:")
             self.servers_name += input("\nServer name:")
             self.interval = int(input("\nData Gather Interval:"))
@@ -49,7 +49,7 @@ class Main:
     async def establish_connection(self):
             times_attempted = 1
             try:
-                return await websockets.connect(f'ws://{self.host}:{self.port}'  ,  ping_interval= None  , max_size = 20000000)
+                return await websockets.connect(self.connection_string, ping_interval= None, max_size = 20000000)
             except Exception as e:
                 print(e)
                 ConsoleLogger.log_issue_establishing_connection(times_attempted)
