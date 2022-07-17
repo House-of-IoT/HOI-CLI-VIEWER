@@ -45,7 +45,6 @@ class Main:
             t1 = loop.create_task(self.begin_logging_information())
             await asyncio.wait([t1])
 
-    
     async def establish_connection(self):
             times_attempted = 1
             try:
@@ -57,15 +56,16 @@ class Main:
 
     async def gather_all_data_for_interval(self):
         config = await self.request_data_and_parse_config("server_config")
-        contacts =await self.request_data_and_parse("contact_list", "array")
+        contacts = await self.request_data_and_parse("contact_list", "array")
         banned_ips = await self.request_data_and_parse("servers_banned_ips","array")
         all_devices = await self.request_data_and_parse("servers_devices","map")
         deactivated_bots = await self.request_data_and_parse("servers_deactivated_bots","array")
-        facing = Facing(all_devices,config,json.loads(contacts),banned_ips,deactivated_bots)
+        passive_data = await self.request_handler.request_passive_data()
+            
+        facing = Facing(all_devices,config,json.loads(contacts),banned_ips,deactivated_bots,passive_data)
         facing.analyze_data_and_populate_instance()
         return facing
         
-
     async def begin_logging_information(self):
         while True:
             facing = await self.gather_all_data_for_interval()

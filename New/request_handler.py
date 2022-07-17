@@ -5,6 +5,16 @@ class RequestHandler:
         self.parent = parent
         self.websocket = websocket
 
+    async def request_passive_data(self):
+        await self.websocket.send("passive_data")
+        passive_data = await self.websocket.recv()
+        try:
+            return json.loads(passive_data)
+        except Exception as e:
+            print(e)
+            return None
+            
+
     async def handle_two_way_request(self,message):
         await self.websocket.send(message)
         response = await self.websocket.recv()

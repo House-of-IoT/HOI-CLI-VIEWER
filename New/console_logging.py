@@ -51,6 +51,9 @@ class ConsoleLogger:
         ConsoleLogger.log_header("Contacts")
         ConsoleLogger.log_sub_data("Number Of Contacts",facing_data.num_of_contacts)
         ConsoleLogger.log_all(facing_data.contacts,"All Contacts")
+        ConsoleLogger.log_header("Relations")
+        ConsoleLogger.log_all(facing_data.relation_num_list, "Num/Device")
+        ConsoleLogger.log_sub_data("Number Of Relations",facing_data.num_of_relations)
         
     @staticmethod
     def log_no_config():
